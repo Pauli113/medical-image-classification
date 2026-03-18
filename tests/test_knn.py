@@ -12,10 +12,18 @@ def test_knn_flatten():
 def test_knn_training():
     #fake picture generation using vectors
     X_train = np.random.rand(30, 150528)
-    y_train = np.array([0, 1, 2] * 10)  # 10x wiederholt
+    y_train = np.array([0, 1, 2] * 10)  # 10 repetitions
     knn = KNN()
     knn.fit(X_train, y_train)
     assert(knn.best_k() in [3, 5, 7, 9])
 
 def test_knn_prediction():
-    ...
+    #fake picture generation using vectors
+    X_train = np.random.rand(30, 150528)
+    y_train = np.array([0, 1, 2] * 10)  # 10 repetitions
+    knn = KNN()
+    knn.fit(X_train, y_train)
+    X_test = np.random.rand(1, 150528)
+    prediction = knn.predict(X_test)
+    assert prediction[0] in [0, 1, 2]
+
