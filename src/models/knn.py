@@ -9,8 +9,10 @@ class KNN:
             k_list = [3, 5, 7, 9]
         param_grid = {"n_neighbors": list(k_list)}
         knn = KNeighborsClassifier()
-        self.model = GridSearchCV(knn, param_grid, cv=5, n_jobs=1)
+        self.model = GridSearchCV(knn, param_grid, cv=3, n_jobs=1)
 
+    def best_k(self):
+        return self.model.best_params_["n_neighbors"]
     def fit(self, X, y):
         self.model.fit(X, y)
 
