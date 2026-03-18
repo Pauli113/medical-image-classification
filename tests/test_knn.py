@@ -1,7 +1,7 @@
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
-from src.models.knn import KNN
+from src.models.knn.knn import KNN
 
 
 #checks image to vector code
