@@ -1,7 +1,17 @@
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
 class KNN:
-    def fit(self, X,y):
-        self.X_train = X
-        self.y_train = y
+
+    # init KNN with 3,5,7,9 as n
+    def __init__(self, k_list=None):
+        if k_list is None:
+            k_list = [3, 5, 7, 9]
+        param_grid = {"n_neighbors": list(k_list)}
+        knn = KNeighborsClassifier()
+        self.model = GridSearchCV(knn, param_grid, cv=5, n_jobs=1)
+
+    def fit(self, X, y):
+        self.model.fit(X, y)
 
     def predict(self, X):
-        pass
+        return self.model.predict(X)
