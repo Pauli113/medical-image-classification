@@ -3,7 +3,6 @@ import numpy as np
 
 from src.models.knn.knn import KNN
 
-
 #checks image to vector code
 def test_knn_flatten():
     picture = np.random.rand(3,224,224)
