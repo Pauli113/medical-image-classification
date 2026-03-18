@@ -1,7 +1,8 @@
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
-class KNN:
 
+
+class KNN:
     # init KNN with 3,5,7,9 as n
     def __init__(self, k_list=None):
         if k_list is None:
