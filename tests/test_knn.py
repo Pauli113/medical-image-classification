@@ -1,3 +1,4 @@
+from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 from src.models.knn import KNN
@@ -26,4 +27,12 @@ def test_knn_prediction():
     X_test = np.random.rand(1, 150528)
     prediction = knn.predict(X_test)
     assert prediction[0] in [0, 1, 2]
+
+def test_knn_fit():
+    #fake picture generation using vectors
+    picture = np.random.rand(3,224,224)
+    picture = picture.flatten().reshape(1,-1)
+    scaler = StandardScaler()
+    picture_scaled = scaler.fit_transform(picture)
+    assert abs(np.mean(picture_scaled)) < 0.01
 
