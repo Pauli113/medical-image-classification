@@ -15,5 +15,10 @@ def test_unet_encoder():
     assert output.shape == (1,64,224,224)
 
 def test_unet_predict():
-    pass
+    model = UNet(num_classes=3)
+    x = torch.randn(1, 3, 224, 224)  # 1 Bild, 3 Farbkanäle, 224x224
+    output = model(x)
+    prediction = torch.argmax(output, dim=1)
+    assert prediction.item() in [0,1,2]
+
 

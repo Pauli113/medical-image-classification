@@ -19,6 +19,7 @@ def decoder(in_ch, out_ch):
 class UNet(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
+
         #architecture
         #encoder
         self.enc1 = encoder(3, 64)
