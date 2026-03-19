@@ -1,5 +1,5 @@
 import torch
-from src.models.unet.unet import UNet
+from src.models.unet.unet import UNet, encoder
 
 def test_unet_forward():
     model = UNet(num_classes=3)
@@ -9,7 +9,10 @@ def test_unet_forward():
 
 
 def test_unet_encoder():
-    pass
+    block = encoder(3,64)
+    x = torch.rand(1,3,224,224)
+    output = block(x)
+    assert output.shape == (1,64,224,224)
 
 def test_unet_predict():
     pass
