@@ -1,6 +1,5 @@
+import torch
 import torch.nn as nn
-from torchvision import models
-
 def encoder(in_ch, out_ch):
     return nn.Sequential(
         nn.Conv2d(in_ch,out_ch,kernel_size=3,padding=1),
@@ -20,6 +19,7 @@ def decoder(in_ch, out_ch):
 class UNet(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
+        #architecture
         #encoder
         self.enc1 = encoder(3, 64)
         self.enc2 = encoder(64, 128)
@@ -52,6 +52,9 @@ class UNet(nn.Module):
         bottleneck = self.bottleneck(self.pool(e4))
 
         #decoder
+        d1 = self.dec1(torch.cat([self.up(bottleneck), e4], dim=1))
+        d2 = self.dec2(torch.cat([self.up(d1), e3], dim=1))
+        d3 = self.dec3(torch.cat([self.up(d2), e2], dim=1))
+        d4 = self.dec4(torch.cat([self.up(d3), e1], dim=1))
 
-
-        return bottleneck
+        return self.classifier(d4)
