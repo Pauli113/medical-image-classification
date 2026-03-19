@@ -62,3 +62,6 @@ class UNet(nn.Module):
         x = self.classifier(d4)
         x = x.mean(dim=[2,3])
         return x
+
+    def train_model(self):
+        pass
