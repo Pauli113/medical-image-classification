@@ -57,4 +57,7 @@ class UNet(nn.Module):
         d3 = self.dec3(torch.cat([self.up(d2), e2], dim=1))
         d4 = self.dec4(torch.cat([self.up(d3), e1], dim=1))
 
-        return self.classifier(d4)
+        #classification
+        x = self.classifier(d4)
+        x = x.mean(dim=[2,3])
+        return x
