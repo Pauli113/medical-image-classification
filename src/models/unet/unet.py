@@ -112,3 +112,7 @@ class UNet(nn.Module):
 
 
         return train_accuracies, val_accuracies
+
+
+
+
