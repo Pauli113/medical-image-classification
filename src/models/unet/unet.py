@@ -63,5 +63,7 @@ class UNet(nn.Module):
         x = x.mean(dim=[2,3])
         return x
 
-    def train_model(self):
-        pass
+    def train_model(self, train_loader, val_loader, epochs):
+        train_accuracies = []
+        val_accuracies = []
+        return train_accuracies, val_accuracies
