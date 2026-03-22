@@ -64,6 +64,51 @@ class UNet(nn.Module):
         return x
 
     def train_model(self, train_loader, val_loader, epochs):
+        #updates weights
+        optimizer = torch.optim.Adam(self.parameters())
+        #loss function
+        criterion = nn.CrossEntropyLoss()
+
         train_accuracies = []
         val_accuracies = []
+
+        for epoch in range(epochs):
+            #trainig
+            self.train()
+            correct = 0
+            total = 0
+            #training
+            for x, y in train_loader:
+                #reset weights
+                optimizer.zero_grad()
+                #predcition
+                output = self(x)
+                #calculate loss
+                loss = criterion(output, y)
+                #backpropagate loss
+                loss.backward()
+                #update weights
+                optimizer.step()
+                #return index of highest value - i.e prediction
+                pred = torch.argmax(output, dim=1)
+                #sum up correct predictions and return number
+                correct += (pred == y).sum().item()
+                total += y.size(0) #total is equal to all pictures in dataloader
+            train_accuracies.append(correct/total)
+
+            #validation
+            correct = 0
+            total = 0
+            with torch.no_grad():
+                for x, y in val_loader:
+                    #prediction
+                    output = self(x)
+                    #return index of highest value - i.e prediction
+                    pred = torch.argmax(output, dim=1)
+                     #sum up correct predictions and return number
+                    correct += (pred == y).sum().item()
+                    total += y.size(0) #total is equal to all pictures in dataloader
+            val_accuracies.append(correct/total)
+
+
         return train_accuracies, val_accuracies
