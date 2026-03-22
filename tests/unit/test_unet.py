@@ -1,4 +1,6 @@
 import torch
+from torch.utils.data import TensorDataset, DataLoader
+
 from src.models.unet.unet import UNet, encoder
 
 def test_unet_forward():
@@ -21,4 +23,16 @@ def test_unet_predict():
     prediction = torch.argmax(output, dim=1)
     assert prediction.item() in [0,1,2]
 
+def test_unet_train():
+    model = UNet(num_classes=3)
+    # Fake Bilder und Labels
+    X = torch.randn(10, 3, 224, 224)  # 10 Bilder
+    y = torch.tensor([0, 1, 2, 0, 1, 2, 0, 1, 2, 0])  # Labels
 
+    #Dataset und TrainLoader
+    dataset = TensorDataset(X, y)
+    train_loader = DataLoader(dataset, batch_size=2)
+    val_loader = DataLoader(dataset, batch_size=2)
+    [train_acc, val_acc] = model.train_model(train_loader, val_loader, epochs=2)
+    assert len(train_acc) == 2
+    assert len(val_acc) == 2
