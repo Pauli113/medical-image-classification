@@ -1,0 +1,16 @@
+# Daten
+data/
+
+# Python
+__pycache__/
+*.pyc
+.env
+venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Outputs
+*.png
+*.xlsx
