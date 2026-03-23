@@ -33,6 +33,6 @@ def test_unet_train():
     dataset = TensorDataset(X, y)
     train_loader = DataLoader(dataset, batch_size=2)
     val_loader = DataLoader(dataset, batch_size=2)
-    [train_acc, val_acc] = model.train_model(train_loader, val_loader, epochs=2)
+    [train_acc, val_acc] = model.run_unet(train_loader, val_loader, epochs=2)
     assert len(train_acc) == 2
     assert len(val_acc) == 2

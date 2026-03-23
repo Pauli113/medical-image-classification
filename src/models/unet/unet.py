@@ -1,118 +1,108 @@
 import torch
 import torch.nn as nn
+
+
 def encoder(in_ch, out_ch):
     return nn.Sequential(
-        nn.Conv2d(in_ch,out_ch,kernel_size=3,padding=1),
+        nn.Conv2d(in_ch, out_ch, kernel_size=3, padding=1),
         nn.ReLU(),
-        nn.Conv2d(out_ch,out_ch,kernel_size=3,padding=1),
+        nn.Conv2d(out_ch, out_ch, kernel_size=3, padding=1),
         nn.ReLU()
     )
 
+
 def decoder(in_ch, out_ch):
     return nn.Sequential(
-        nn.Conv2d(in_ch,out_ch,kernel_size=3,padding=1),
+        nn.Conv2d(in_ch, out_ch, kernel_size=3, padding=1),
         nn.ReLU(),
-        nn.Conv2d(out_ch,out_ch,kernel_size=3,padding=1),
+        nn.Conv2d(out_ch, out_ch, kernel_size=3, padding=1),
         nn.ReLU()
     )
+
 
 class UNet(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
-
-        #architecture
-        #encoder
+        # encoder
         self.enc1 = encoder(3, 64)
         self.enc2 = encoder(64, 128)
         self.enc3 = encoder(128, 256)
         self.enc4 = encoder(256, 512)
         self.pool = nn.MaxPool2d(2)
-
-        #bottleneck
+        # bottleneck
         self.bottleneck = encoder(512, 1024)
-
-        #decoder
+        # decoder
         self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
-
-        self.dec1 = decoder(1536, 512) #1024 + 512 (skip connections)
-        self.dec2 = decoder(768, 256) #512 + 256
-        self.dec3 = decoder(384, 128) #256 + 128
-        self.dec4 = decoder(192, 64) #128 + 64
-
+        self.dec1 = decoder(1536, 512)  # 1024 + 512 (skip connections)
+        self.dec2 = decoder(768, 256)   # 512 + 256
+        self.dec3 = decoder(384, 128)   # 256 + 128
+        self.dec4 = decoder(192, 64)    # 128 + 64
         self.classifier = nn.Conv2d(64, num_classes, kernel_size=1)
 
-
     def forward(self, x):
-        #encoder
-        e1 = self.enc1(x) #224x224
-        e2 = self.enc2(self.pool(e1)) #112x112
-        e3 = self.enc3(self.pool(e2)) #56x56
-        e4 = self.enc4(self.pool(e3)) #28x28
-
-        #bottleneck
+        # encoder
+        e1 = self.enc1(x)                    # 224x224
+        e2 = self.enc2(self.pool(e1))        # 112x112
+        e3 = self.enc3(self.pool(e2))        # 56x56
+        e4 = self.enc4(self.pool(e3))        # 28x28
+        # bottleneck
         bottleneck = self.bottleneck(self.pool(e4))
-
-        #decoder
+        # decoder with skip connections
         d1 = self.dec1(torch.cat([self.up(bottleneck), e4], dim=1))
         d2 = self.dec2(torch.cat([self.up(d1), e3], dim=1))
         d3 = self.dec3(torch.cat([self.up(d2), e2], dim=1))
         d4 = self.dec4(torch.cat([self.up(d3), e1], dim=1))
-
-        #classification
+        # classification
         x = self.classifier(d4)
-        x = x.mean(dim=[2,3])
+        x = x.mean(dim=[2, 3])
         return x
 
-    def train_model(self, train_loader, val_loader, epochs):
-        #updates weights
+    def run_unet(self, train_loader, val_loader, epochs):
+        # updates weights
         optimizer = torch.optim.Adam(self.parameters())
-        #loss function
+        # loss function
         criterion = nn.CrossEntropyLoss()
 
         train_accuracies = []
         val_accuracies = []
 
         for epoch in range(epochs):
-            #trainig
+            # training
             self.train()
             correct = 0
             total = 0
-            #training
             for x, y in train_loader:
-                #reset weights
+                # reset gradients
                 optimizer.zero_grad()
-                #predcition
+                # prediction
                 output = self(x)
-                #calculate loss
+                # calculate loss
                 loss = criterion(output, y)
-                #backpropagate loss
+                # backpropagate loss
                 loss.backward()
-                #update weights
+                # update weights
                 optimizer.step()
-                #return index of highest value - i.e prediction
+                # return index of highest value - i.e prediction
                 pred = torch.argmax(output, dim=1)
-                #sum up correct predictions and return number
+                # sum up correct predictions
                 correct += (pred == y).sum().item()
-                total += y.size(0) #total is equal to all pictures in dataloader
-            train_accuracies.append(correct/total)
+                # total is equal to all pictures in dataloader
+                total += y.size(0)
+            train_accuracies.append(correct / total)
 
-            #validation
+            # validation
             correct = 0
             total = 0
             with torch.no_grad():
                 for x, y in val_loader:
-                    #prediction
+                    # prediction
                     output = self(x)
-                    #return index of highest value - i.e prediction
+                    # return index of highest value - i.e prediction
                     pred = torch.argmax(output, dim=1)
-                     #sum up correct predictions and return number
+                    # sum up correct predictions
                     correct += (pred == y).sum().item()
-                    total += y.size(0) #total is equal to all pictures in dataloader
-            val_accuracies.append(correct/total)
-
+                    # total is equal to all pictures in dataloader
+                    total += y.size(0)
+            val_accuracies.append(correct / total)
 
         return train_accuracies, val_accuracies
-
-
-
-
