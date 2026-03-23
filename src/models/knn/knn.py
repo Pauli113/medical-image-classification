@@ -25,3 +25,6 @@ class KNN:
 
     def score(self, X, y):
         return self.model.score(X, y)
+
+    def run_knn(self, train_loader, val_loader):
+        pass

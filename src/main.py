@@ -2,7 +2,7 @@ import os
 
 import torch, torchvision
 from src.models.knn.knn import KNN
-from src.models.unet.unet import run_unet
+from src.models.unet.unet import UNet
 from src.utils.timer import Timer
 import matplotlib
 import pandas
@@ -48,12 +48,21 @@ def main():
         val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=32, shuffle=False)
 
         #Run U-Net model
-        unet_time, train_accuracies, val_accuracies = run_unet(train_loader, val_loader, epochs=5)
+        unet_model = UNet(num_classes=len(dataset.classes))
+        timer = Timer()
+        timer.start()
+        train_accuracies, val_accuracies = unet_model.run_unet(train_loader, val_loader, epochs=5)
+        unet_time = timer.stop()
         train_acc_history[dataset_name] = train_accuracies
         val_acc_history[dataset_name] = val_accuracies
 
         #Run KNN model
-        knn_time, knn_accuracy = run_knn
+        knn_model = KNN()
+        timer = Timer()
+        timer.start()
+        knn_accuracy = knn_model.run_knn(train_loader, val_loader)
+        knn_time = timer.stop()
+        knn_acc_history[dataset_name] = knn_accuracy
 
 if __name__ == "__main__":
     main()
