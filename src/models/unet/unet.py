@@ -122,4 +122,4 @@ class UNet(nn.Module):
 
         print(f'U-Net Validation Accuracy: {val_accuracies[-1]*100:.2f}%')
         print(f'U-Net Validation Time: {unet_time}%')
-        return train_accuracies, val_accuracies
+        return train_accuracies, val_accuracies, unet_time

@@ -61,4 +61,4 @@ class KNN:
         print(f'KNN Validation Accuracy: {knn_accuracy*100:.2f}%')
         print(f'KNN Training Time: {knn_time}')
 
-        return knn_accuracy
+        return knn_accuracy, knn_time

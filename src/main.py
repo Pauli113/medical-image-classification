@@ -47,19 +47,21 @@ def main():
 
         #Run U-Net model
         unet_model = UNet(num_classes=len(dataset.classes))
-        train_accuracies, val_accuracies = unet_model.run_unet(train_loader, val_loader, epochs=5)
+        train_accuracies, val_accuracies, unet_time = unet_model.run_unet(train_loader, val_loader, epochs=5)
         train_acc_history[dataset_name] = train_accuracies
         val_acc_history[dataset_name] = val_accuracies
 
         #Run KNN model
         knn_model = KNN()
-        knn_accuracy = knn_model.run_knn(train_loader, val_loader)
+        knn_accuracy, knn_time = knn_model.run_knn(train_loader, val_loader)
         knn_acc_history[dataset_name] = knn_accuracy
 
         results.append({
             'Dataset': dataset_name,
             'U-Net Accuracy': val_accuracies[-1],
-            'KNN Accuracy': knn_accuracy
+            'U-Net Time': unet_time,
+            'KNN Accuracy': knn_accuracy,
+            'KNN Time': knn_time
         })
 
     # Plot Creation
