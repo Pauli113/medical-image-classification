@@ -1,4 +1,3 @@
-import time
 
 import torch
 import torch.nn as nn
@@ -62,7 +61,8 @@ class UNet(nn.Module):
         return x
 
     def run_unet(self, train_loader, val_loader, epochs):
-        start_time = Timer.start()
+        timer = Timer()
+        timer.start()
         # updates weights
         optimizer = torch.optim.Adam(self.parameters())
         # loss function
@@ -117,11 +117,8 @@ class UNet(nn.Module):
             print(f'Validation Accuracy: {val_accuracies[-1]*100:.2f}%')
 
         #time -- hier mit timer arbeiten
-        end_time = Timer.stop()
-        elapsed_time = end_time - start_time
-        minutes = int(elapsed_time // 60)
-        seconds = int(elapsed_time % 60)
-        unet_time = f'{minutes} min {seconds} sec'
+        unet_time = timer.stop()
+
 
         print(f'U-Net Validation Accuracy: {val_accuracies[-1]*100:.2f}%')
         print(f'U-Net Validation Time: {unet_time}%')
