@@ -1,5 +1,9 @@
+import time
+
 import torch
 import torch.nn as nn
+
+from src.utils.timer import Timer
 
 
 def encoder(in_ch, out_ch):
@@ -58,6 +62,7 @@ class UNet(nn.Module):
         return x
 
     def run_unet(self, train_loader, val_loader, epochs):
+        start_time = Timer.start()
         # updates weights
         optimizer = torch.optim.Adam(self.parameters())
         # loss function
@@ -71,6 +76,7 @@ class UNet(nn.Module):
             self.train()
             correct = 0
             total = 0
+            running_loss = 0.0
             for x, y in train_loader:
                 # reset gradients
                 optimizer.zero_grad()
@@ -78,6 +84,7 @@ class UNet(nn.Module):
                 output = self(x)
                 # calculate loss
                 loss = criterion(output, y)
+                running_loss += loss.item()
                 # backpropagate loss
                 loss.backward()
                 # update weights
@@ -105,4 +112,17 @@ class UNet(nn.Module):
                     total += y.size(0)
             val_accuracies.append(correct / total)
 
+            # Print per Epoch
+            print(f'Epoch {epoch+1}/{epochs}, Loss: {running_loss/len(train_loader):.4f}, Training Accuracy: {train_accuracies[-1]*100:.2f}%')
+            print(f'Validation Accuracy: {val_accuracies[-1]*100:.2f}%')
+
+        #time -- hier mit timer arbeiten
+        end_time = Timer.stop()
+        elapsed_time = end_time - start_time
+        minutes = int(elapsed_time // 60)
+        seconds = int(elapsed_time % 60)
+        unet_time = f'{minutes} min {seconds} sec'
+
+        print(f'U-Net Validation Accuracy: {val_accuracies[-1]*100:.2f}%')
+        print(f'U-Net Validation Time: {unet_time}%')
         return train_accuracies, val_accuracies

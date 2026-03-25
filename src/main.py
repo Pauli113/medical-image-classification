@@ -4,11 +4,9 @@ import torch, torchvision
 from src.models.knn.knn import KNN
 from src.models.unet.unet import UNet
 from src.utils.timer import Timer
-import matplotlib
-import pandas
 import matplotlib.pyplot as plt
 from torchvision import datasets, transforms
-from torch.utils.data import DataLoader, random_split
+import pandas as pd
 def main():
     #define transformations
     transform = transforms.Compose([
@@ -49,20 +47,43 @@ def main():
 
         #Run U-Net model
         unet_model = UNet(num_classes=len(dataset.classes))
-        timer = Timer()
-        timer.start()
         train_accuracies, val_accuracies = unet_model.run_unet(train_loader, val_loader, epochs=5)
-        unet_time = timer.stop()
         train_acc_history[dataset_name] = train_accuracies
         val_acc_history[dataset_name] = val_accuracies
 
         #Run KNN model
         knn_model = KNN()
-        timer = Timer()
-        timer.start()
         knn_accuracy = knn_model.run_knn(train_loader, val_loader)
-        knn_time = timer.stop()
         knn_acc_history[dataset_name] = knn_accuracy
+
+        results.append({
+            'Dataset': dataset_name,
+            'U-Net Accuracy': val_accuracies[-1],
+            'KNN Accuracy': knn_accuracy
+        })
+
+    # Plot Creation
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+    # UNet on top
+    for dataset_name in data_dirs.keys():
+        ax1.plot(train_acc_history[dataset_name], label=f'{dataset_name} Train')
+        ax1.plot(val_acc_history[dataset_name], label=f'{dataset_name} Val')
+    ax1.set_title('U-Net Training and Validation Accuracies')
+    ax1.set_xlabel('Epoch')
+    ax1.set_ylabel('Accuracy')
+    ax1.legend()
+
+    # KNN below
+    ax2.bar(knn_acc_history.keys(), knn_acc_history.values())
+    ax2.set_title('KNN Validation Accuracy')
+    ax2.set_ylabel('Accuracy')
+
+    plt.tight_layout()
+    plt.savefig('results.png')
+
+    #show result table
+    results_df = pd.DataFrame(results)
+    print(results_df)
 
 if __name__ == "__main__":
     main()

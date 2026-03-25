@@ -1,6 +1,12 @@
+import time
+
+import numpy as np
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
+
+from src.utils.timer import Timer
 
 
 class KNN:
@@ -24,7 +30,50 @@ class KNN:
         return self.model.predict(X)
 
     def score(self, X, y):
+        X = self.scaler.transform(X)
         return self.model.score(X, y)
 
     def run_knn(self, train_loader, val_loader):
-        pass
+        start_time = Timer.start()
+        #extract images from dataloader and flatten
+        #flatten to convert 2D images to 1D vectors
+        x_train, y_train = [], []
+        for x, y in train_loader:
+            x_train.append(x.view(x.size(0), -1).numpy())
+            y_train.append(y.numpy())
+        x_val, y_val = [], []
+        for x, y in val_loader:
+            x_val.append(x.view(x.size(0), -1).numpy())
+            y_val.append(y.numpy())
+
+        #concat all batches from train arrays
+        x_train = np.concatenate(x_train, axis=0)
+        y_train = np.concatenate(y_train, axis=0)
+
+        x_val = np.concatenate(x_val, axis=0)
+        y_val = np.concatenate(y_val, axis=0)
+
+        #training
+        self.fit(x_train, y_train)
+
+        #prediction
+        prediction = self.predict(x_val)
+        accuracy = accuracy_score(y_val, prediction) * 100.0
+
+        #time
+        #time -- hier mit timer arbeiten
+        end_time = Timer.stop()
+        elapsed_time = end_time - start_time
+        minutes = int(elapsed_time // 60)
+        seconds = int(elapsed_time % 60)
+        knn_time = f'{minutes} min {seconds} sec'
+
+
+
+        print(f'KNN Validation Accuracy: {accuracy:.2f}%')
+        print(f'KNN Training Time: {knn_time}')
+
+
+
+        #accuracy
+        return accuracy
