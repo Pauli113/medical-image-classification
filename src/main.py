@@ -1,10 +1,9 @@
 import os
 
-import torch
 from src.utils.runner import run_models, load_dataset
 from src.utils.plot import plot_results
-import matplotlib.pyplot as plt
-from torchvision import datasets, transforms
+
+from torchvision import transforms
 import pandas as pd
 
 
