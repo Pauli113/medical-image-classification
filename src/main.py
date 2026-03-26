@@ -3,8 +3,7 @@ import os
 import torch, torchvision
 from src.models.knn.knn import KNN
 from src.models.unet.unet import UNet
-from src.utils.timer import Timer
-import matplotlib.pyplot as plt
+from src.utils.plot import plot_results
 from torchvision import datasets, transforms
 import pandas as pd
 def main():
@@ -63,26 +62,8 @@ def main():
             'KNN Accuracy': knn_accuracy,
             'KNN Time': knn_time
         })
-
-    # Plot Creation
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
-    # UNet on top
-    for dataset_name in data_dirs.keys():
-        ax1.plot(train_acc_history[dataset_name], label=f'{dataset_name} Train')
-        ax1.plot(val_acc_history[dataset_name], label=f'{dataset_name} Val')
-    ax1.set_title('U-Net Training and Validation Accuracies')
-    ax1.set_xlabel('Epoch')
-    ax1.set_ylabel('Accuracy')
-    ax1.legend()
-
-    # KNN below
-    ax2.bar(knn_acc_history.keys(), knn_acc_history.values())
-    ax2.set_title('KNN Validation Accuracy')
-    ax2.set_ylabel('Accuracy')
-
-    plt.tight_layout()
-    plt.savefig('results.png')
-
+    #plot creation
+    plot_results(train_acc_history, val_acc_history, knn_acc_history)
     #show result table
     results_df = pd.DataFrame(results)
     print(results_df)

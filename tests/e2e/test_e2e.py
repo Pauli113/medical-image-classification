@@ -6,6 +6,7 @@ from torch.utils.data import TensorDataset, DataLoader
 
 from src.models.knn.knn import KNN
 from src.models.unet.unet import UNet
+from src.utils.plot import plot_results
 
 
 def test_e2e():
@@ -18,7 +19,7 @@ def test_e2e():
 
     # KNN mit DataLoader
     knn = KNN()
-    knn_accuracy = knn.run_knn(train_loader, val_loader)
+    knn_accuracy, knn_time = knn.run_knn(train_loader, val_loader)
     assert knn_accuracy >= 0
 
     # UNet
@@ -28,21 +29,15 @@ def test_e2e():
     prediction = torch.argmax(output, dim=1)
     assert prediction.item() in [0, 1, 2]
 
-    train_acc, val_acc = model.run_unet(train_loader, val_loader, epochs=2)
+    train_acc, val_acc, unet_time = model.run_unet(train_loader, val_loader, epochs=2)
     assert len(train_acc) == 2
     assert len(val_acc) == 2
 
     # Plot Creation
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
-    # UNet oben
-    ax1.plot(train_acc, label="U-Net Train")
-    ax1.plot(val_acc, label="U-Net Val")
-    ax1.set_title('U-Net Training and Validation Accuracies')
-    ax1.legend()
-    # KNN unten
-    ax2.bar(['KNN'], [knn_accuracy])
-    ax2.set_title('KNN Validation Accuracy')
-    plt.tight_layout()
-    plt.savefig('test_plot.png')
-    assert os.path.exists('test_plot.png')
-    os.remove('test_plot.png')
+    train_acc_history = {'fake': train_acc}
+    val_acc_history = {'fake': val_acc}
+    knn_acc_history = {'fake': knn_accuracy}
+
+    plot_results(train_acc_history, val_acc_history, knn_acc_history)
+    assert os.path.exists('results.png')
+    os.remove('results.png')
