@@ -2,8 +2,8 @@ import torch
 import os
 from torch.utils.data import TensorDataset, DataLoader
 
-from src.models.knn.knn import KNN
-from src.models.unet.unet import UNet
+from src.models.knn.application.knn_trainer import KNNTrainer
+from src.models.unet.application.unet_trainer import UNetTrainer
 from src.utils.plot import plot_results
 from src.utils.runner import run_models
 
@@ -17,14 +17,14 @@ def test_e2e():
     val_loader = DataLoader(dataset, batch_size=2)
 
     # KNN mit DataLoader
-    knn = KNN()
+    knn = KNNTrainer()
     knn_accuracy, knn_time = knn.run_knn(train_loader, val_loader)
     assert knn_accuracy >= 0
 
     # UNet
-    model = UNet(num_classes=3)
+    model = UNetTrainer(num_classes=3)
     x_img = torch.rand(1, 3, 224, 224)
-    output = model(x_img)
+    output = model.model(x_img)
     prediction = torch.argmax(output, dim=1)
     assert prediction.item() in [0, 1, 2]
 

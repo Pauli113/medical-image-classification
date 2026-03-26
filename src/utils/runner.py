@@ -1,9 +1,8 @@
 import torch
 from torchvision import datasets
 
-from src.models.knn.knn import KNN
-from src.models.unet.unet import UNet
-
+from src.models.knn.application.knn_trainer import KNNTrainer
+from src.models.unet.application.unet_trainer import UNetTrainer
 
 
 def load_dataset(data_dir, transform, batch_size=32):
@@ -18,14 +17,15 @@ def load_dataset(data_dir, transform, batch_size=32):
 
     return train_loader, val_loader, len(dataset.classes)
 
+
 def run_models(dataset_name, train_loader, val_loader, num_classes, epochs=5):
     # Run U-Net
-    unet_model = UNet(num_classes=num_classes)
-    train_accuracies, val_accuracies, unet_time = unet_model.run_unet(train_loader, val_loader, epochs=epochs)
+    unet_trainer = UNetTrainer(num_classes=num_classes)
+    train_accuracies, val_accuracies, unet_time = unet_trainer.run_unet(train_loader, val_loader, epochs=epochs)
 
     # Run KNN
-    knn_model = KNN()
-    knn_accuracy, knn_time = knn_model.run_knn(train_loader, val_loader)
+    knn_trainer = KNNTrainer()
+    knn_accuracy, knn_time = knn_trainer.run_knn(train_loader, val_loader)
 
     result = {
         'Dataset': dataset_name,
