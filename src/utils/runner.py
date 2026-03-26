@@ -1,0 +1,38 @@
+import torch
+from torchvision import datasets
+
+from src.models.knn.knn import KNN
+from src.models.unet.unet import UNet
+
+
+
+def load_dataset(data_dir, transform, batch_size=32):
+    dataset = datasets.ImageFolder(data_dir, transform=transform)
+
+    train_size = int(0.8 * len(dataset))
+    val_size = len(dataset) - train_size
+    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+
+    return train_loader, val_loader, len(dataset.classes)
+
+def run_models(dataset_name, train_loader, val_loader, num_classes, epochs=5):
+    # Run U-Net
+    unet_model = UNet(num_classes=num_classes)
+    train_accuracies, val_accuracies, unet_time = unet_model.run_unet(train_loader, val_loader, epochs=epochs)
+
+    # Run KNN
+    knn_model = KNN()
+    knn_accuracy, knn_time = knn_model.run_knn(train_loader, val_loader)
+
+    result = {
+        'Dataset': dataset_name,
+        'U-Net Accuracy': val_accuracies[-1],
+        'U-Net Time': unet_time,
+        'KNN Accuracy': knn_accuracy,
+        'KNN Time': knn_time
+    }
+
+    return train_accuracies, val_accuracies, knn_accuracy, result

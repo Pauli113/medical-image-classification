@@ -7,6 +7,7 @@ from torch.utils.data import TensorDataset, DataLoader
 from src.models.knn.knn import KNN
 from src.models.unet.unet import UNet
 from src.utils.plot import plot_results
+from src.utils.runner import run_models
 
 
 def test_e2e():
@@ -32,6 +33,14 @@ def test_e2e():
     train_acc, val_acc, unet_time = model.run_unet(train_loader, val_loader, epochs=2)
     assert len(train_acc) == 2
     assert len(val_acc) == 2
+
+    # run_models testen
+    train_accuracies, val_accuracies, knn_accuracy, result = run_models(
+        'fake', train_loader, val_loader, num_classes=3, epochs=2
+    )
+    assert 'Dataset' in result
+    assert 'U-Net Accuracy' in result
+    assert 'KNN Accuracy' in result
 
     # Plot Creation
     train_acc_history = {'fake': train_acc}

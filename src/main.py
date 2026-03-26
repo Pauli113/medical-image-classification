@@ -1,13 +1,15 @@
 import os
 
-import torch, torchvision
-from src.models.knn.knn import KNN
-from src.models.unet.unet import UNet
+import torch
+from src.utils.runner import run_models, load_dataset
 from src.utils.plot import plot_results
+import matplotlib.pyplot as plt
 from torchvision import datasets, transforms
 import pandas as pd
+
+
 def main():
-    #define transformations
+    # define transformations
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
@@ -16,15 +18,10 @@ def main():
 
     # Directory paths for datasets
     data_dirs = {
-        'mri': os.path.join(os.path.dirname(__file__), '..', 'data', 'mri'),
-        'xray': os.path.join(os.path.dirname(__file__), '..', 'data', 'xray')
+        'mri': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'mri')),
+        'xray': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'xray'))
     }
 
-    # Correct the paths to reference the parent directory
-    for key in data_dirs.keys():
-        data_dirs[key] = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', key))
-
-    # Store results in a DataFrame
     results = []
     train_acc_history = {}
     val_acc_history = {}
@@ -32,41 +29,22 @@ def main():
 
     for dataset_name, data_dir in data_dirs.items():
         print(f'Running models on {dataset_name} dataset...')
-
-        #Load dataset
-        dataset = datasets.ImageFolder(data_dir, transform=transform)
-
-        # Split dataset into training and validation sets
-        train_size = int(0.8 * len(dataset))
-        val_size = len(dataset) - train_size
-        train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
-
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
-        val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=32, shuffle=False)
-
-        #Run U-Net model
-        unet_model = UNet(num_classes=len(dataset.classes))
-        train_accuracies, val_accuracies, unet_time = unet_model.run_unet(train_loader, val_loader, epochs=5)
+        train_loader, val_loader, num_classes = load_dataset(data_dir, transform)
+        train_accuracies, val_accuracies, knn_accuracy, result = run_models(
+            dataset_name, train_loader, val_loader, num_classes
+        )
         train_acc_history[dataset_name] = train_accuracies
         val_acc_history[dataset_name] = val_accuracies
-
-        #Run KNN model
-        knn_model = KNN()
-        knn_accuracy, knn_time = knn_model.run_knn(train_loader, val_loader)
         knn_acc_history[dataset_name] = knn_accuracy
+        results.append(result)
 
-        results.append({
-            'Dataset': dataset_name,
-            'U-Net Accuracy': val_accuracies[-1],
-            'U-Net Time': unet_time,
-            'KNN Accuracy': knn_accuracy,
-            'KNN Time': knn_time
-        })
-    #plot creation
+    # Plot
     plot_results(train_acc_history, val_acc_history, knn_acc_history)
-    #show result table
+
+    # Results table
     results_df = pd.DataFrame(results)
     print(results_df)
+
 
 if __name__ == "__main__":
     main()
