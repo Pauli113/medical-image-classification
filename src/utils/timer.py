@@ -2,8 +2,6 @@ import time
 
 class Timer:
 
-
-
     def start(self):
         self.start_time = time.time()
 

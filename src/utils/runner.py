@@ -29,9 +29,9 @@ def run_models(dataset_name, train_loader, val_loader, num_classes, epochs=5):
 
     result = {
         'Dataset': dataset_name,
-        'U-Net Accuracy': val_accuracies[-1],
+        'U-Net Accuracy': val_accuracies[-1] * 100,
         'U-Net Time': unet_time,
-        'KNN Accuracy': knn_accuracy,
+        'KNN Accuracy': knn_accuracy * 100,
         'KNN Time': knn_time
     }
 

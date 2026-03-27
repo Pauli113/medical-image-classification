@@ -16,9 +16,11 @@ def plot_results(train_acc_history, val_acc_history, knn_acc_history):
 
     # KNN below
     knn_vals = {k: v * 100 for k, v in knn_acc_history.items()}
-    ax2.bar(knn_vals.keys(), knn_vals.values())
-    ax2.set_title('KNN Validation Accuracy')
+    for dataset_name, val in knn_vals.items():
+        ax2.bar(dataset_name, val, label=f'{dataset_name} KNN Val')
+    ax2.set_title('KNN Validation Accuracies')
     ax2.set_ylabel('Accuracy (%)')
+    ax2.legend()
 
     plt.tight_layout()
     plt.savefig('results.png')
