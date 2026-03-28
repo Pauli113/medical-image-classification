@@ -40,7 +40,7 @@ class Generator(nn.Module):
         self.dec3 = decoder(384, 128)   # 256 + 128
         self.dec4 = decoder(192, 64)    # 128 + 64
         self.final = nn.Sequential(
-            nn.Conv2d(64,3, kernel_size=1),
+            nn.Conv2d(64, 3, kernel_size=1),
             nn.Tanh()
         )
 
