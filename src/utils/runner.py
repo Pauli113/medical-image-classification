@@ -1,6 +1,7 @@
 import torch
 from torchvision import datasets
 
+from src.models.gan.application.gan_trainer import GANTrainer
 from src.models.knn.application.knn_trainer import KNNTrainer
 from src.models.unet.application.unet_trainer import UNetTrainer
 
@@ -36,3 +37,8 @@ def run_models(dataset_name, train_loader, val_loader, num_classes, epochs=5):
     }
 
     return train_accuracies, val_accuracies, knn_accuracy, result
+
+def run_gan(train_loader, epochs=5):
+    trainer = GANTrainer()
+    gan_time = trainer.train(train_loader, epochs)
+    return trainer.generator, gan_time
