@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from src.models.gan.domain.discriminator import Discriminator
 from src.models.gan.domain.generator import Generator
+from src.utils.timer import Timer
 
 
 class GANTrainer:
@@ -15,7 +16,11 @@ class GANTrainer:
         self.criterion = nn.BCELoss()
 
     def train(self, train_loader, epochs):
+        timer = Timer()
+        timer.start()
         for epoch in range(epochs):
+            loss_discriminator_total = 0.0
+            loss_generator_total = 0.0
             for real_images, _ in train_loader:
                 #train discriminator
                 self.discriminator.train()
@@ -45,7 +50,14 @@ class GANTrainer:
                 fake_images = self.generator(real_images)
                 fake_output = self.discriminator(fake_images)
                 real_labels = torch.ones_like(fake_output)
+
                 #total loss
                 loss_generator = self.criterion(fake_output, real_labels)
                 loss_generator.backward()
                 self.optimizer_generator.step()
+                loss_discriminator_total += loss_discriminator.item()
+                loss_generator_total += loss_generator.item()
+            print(f'Epoch {epoch+1}/{epochs}, Loss D: {loss_discriminator_total:.4f}, Loss G: {loss_generator_total:.4f}')
+        gan_time = timer.stop()
+        print(f'GAN Training Time: {gan_time}')
+        return gan_time
