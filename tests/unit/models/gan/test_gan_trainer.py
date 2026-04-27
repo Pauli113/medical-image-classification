@@ -13,6 +13,6 @@ def test_gan_trainer():
 
     #training
     trainer = GANTrainer()
-    gan_time = trainer.train(train_loader, epochs=1)
+    gan_time = trainer.train(train_loader, epochs=5)
     assert isinstance(gan_time, str)
     assert len(gan_time) > 0
