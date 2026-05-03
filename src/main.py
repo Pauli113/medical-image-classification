@@ -1,5 +1,6 @@
 import os
 
+from src.utils.plot_comparisons import plot_all_comparisons
 from src.utils.runner import run_models, load_dataset, run_gan, augment_dataset
 from src.utils.plot import plot_results
 
@@ -18,7 +19,8 @@ def main():
     # Directory paths for datasets
     data_dirs = {
         'mri': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'mri')),
-        'xray': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'xray'))
+        'xray': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'xray')),
+        'xray_small': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'xray_dataset_covid19'))
     }
 
     #training without generated images
@@ -39,9 +41,6 @@ def main():
         val_acc_history[dataset_name] = val_accuracies
         knn_acc_history[dataset_name] = knn_accuracy
         results.append(result)
-
-    # Plot
-    plot_results(train_acc_history, val_acc_history, knn_acc_history)
 
     # Results table
     results_df = pd.DataFrame(results)
@@ -69,8 +68,8 @@ def main():
         knn_acc_history[f'{dataset_name}_gan'] = knn_accuracy
         results.append(result)
 
-    # Plot
-    plot_results(train_acc_history, val_acc_history, knn_acc_history)
+    #all plots
+    plot_all_comparisons(train_acc_history, val_acc_history, knn_acc_history)
 
     # Results table
     results_df = pd.DataFrame(results)
