@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 
 
-def plot_results(train_acc_history, val_acc_history, knn_acc_history):
+def plot_results(train_acc_history, val_acc_history, knn_acc_history, filename='results.png'):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
     # UNet on top
     for dataset_name in train_acc_history.keys():
@@ -23,4 +23,5 @@ def plot_results(train_acc_history, val_acc_history, knn_acc_history):
     ax2.legend()
 
     plt.tight_layout()
-    plt.savefig('results.png')
+    plt.savefig(filename)
+    plt.close()
