@@ -57,31 +57,25 @@ def test_e2e():
 
     # Plot Comparisons testen
     train_acc_history = {'mri': train_acc, 'xray': val_acc, 'xray_covid_19': train_acc,
-                         'xray_small': train_acc,
                          'mri_gan': train_accuracies_gan, 'xray_gan': val_accuracies_gan,
-                         'xray_covid_19_gan': train_accuracies_gan,
-                         'xray_small_gan': train_accuracies_gan}
+                         'xray_covid_19_gan': train_accuracies_gan}
     val_acc_history = {'mri': val_acc, 'xray': val_acc, 'xray_covid_19': val_acc,
-                   'xray_small': val_acc,
-                   'mri_gan': val_accuracies_gan, 'xray_gan': val_accuracies_gan,
-                   'xray_covid_19_gan': val_accuracies_gan,
-                   'xray_small_gan': val_accuracies_gan}
+                       'mri_gan': val_accuracies_gan, 'xray_gan': val_accuracies_gan,
+                       'xray_covid_19_gan': val_accuracies_gan}
     knn_acc_history = {'mri': knn_accuracy, 'xray': knn_accuracy, 'xray_covid_19': knn_accuracy,
-                   'xray_small': knn_accuracy,
-                   'mri_gan': knn_accuracy_gan, 'xray_gan': knn_accuracy_gan,
-                   'xray_covid_19_gan': knn_accuracy_gan,
-                   'xray_small_gan': knn_accuracy_gan}
+                       'mri_gan': knn_accuracy_gan, 'xray_gan': knn_accuracy_gan,
+                       'xray_covid_19_gan': knn_accuracy_gan}
 
     plot_all_comparisons(train_acc_history, val_acc_history, knn_acc_history)
     assert os.path.exists('results_without_gan.png')
     assert os.path.exists('results_with_gan.png')
     assert os.path.exists('results_mri_comparison.png')
     assert os.path.exists('results_xray_comparison.png')
-    assert os.path.exists('results_xray_small_comparison.png')
+    assert os.path.exists('results_xray_covid_19_comparison.png')
     assert os.path.exists('results_xray_gan_comparison.png')
     os.remove('results_without_gan.png')
     os.remove('results_with_gan.png')
     os.remove('results_mri_comparison.png')
     os.remove('results_xray_comparison.png')
-    os.remove('results_xray_small_comparison.png')
+    os.remove('results_xray_covid_19_comparison.png')
     os.remove('results_xray_gan_comparison.png')

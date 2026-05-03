@@ -20,7 +20,7 @@ def main():
     data_dirs = {
         'mri': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'mri')),
         'xray': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'xray')),
-        'xray_small': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'xray_dataset_covid19'))
+        'xray_covid_19': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'xray_dataset_covid19'))
     }
 
     #training without generated images
