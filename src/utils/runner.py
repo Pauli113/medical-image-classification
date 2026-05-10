@@ -49,6 +49,7 @@ def augment_dataset(generator, train_loader):
 
     with torch.no_grad():
         for images, labels in train_loader:
+
             #real images
             all_images.append(images)
             all_labels.append(labels)
