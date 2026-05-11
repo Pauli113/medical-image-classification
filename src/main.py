@@ -1,9 +1,11 @@
 import os
 
+from torch.utils.data import DataLoader, ConcatDataset
+
 from src.utils.plot_comparisons import plot_all_comparisons
 from src.utils.runner import run_models, load_dataset, run_gan, augment_dataset
 
-from torchvision import transforms
+from torchvision import transforms, datasets
 import pandas as pd
 
 
@@ -45,27 +47,29 @@ def main():
     results_df = pd.DataFrame(results)
     print(results_df)
 
-    #training with generated images
+    # Training mit GAN - gespeicherte Bilder laden
+    print("Datasets with augmentation")
     for dataset_name, data_dir in data_dirs.items():
-        print(f'Training GAN on {dataset_name} dataset...')
-        train_loader, val_loader, num_classes = load_dataset(data_dir, transform)
+        gan_dir = os.path.join(data_dir, 'gan')
+        if os.path.exists(gan_dir):
+            print(f'Loading GAN images for {dataset_name}...')
+            train_loader, val_loader, num_classes = load_dataset(data_dir, transform)
+            real_dataset = datasets.ImageFolder(data_dir, transform=transform)
+            gan_dataset = datasets.ImageFolder(gan_dir, transform=transform)
+            augmented_loader = DataLoader(
+                ConcatDataset([real_dataset, gan_dataset]),
+                batch_size=32, shuffle=True
+            )
+            train_accuracies, val_accuracies, knn_accuracy, result = run_models(
+                f'{dataset_name}_gan', augmented_loader, val_loader, num_classes
+            )
+            train_acc_history[f'{dataset_name}_gan'] = train_accuracies
+            val_acc_history[f'{dataset_name}_gan'] = val_accuracies
+            knn_acc_history[f'{dataset_name}_gan'] = knn_accuracy
+            results.append(result)
+        else:
+            print(f'No gan folder for: {dataset_name} – run gan_save.py first!')
 
-        #training GAN
-        print('Training GAN...')
-        generator, gan_time = run_gan(train_loader, epochs=50)
-
-        # Augment Dataset
-        augmented_loader = augment_dataset(generator, train_loader)
-
-        # Train with augmented Dataset
-        print(f'Running models on augmented {dataset_name} dataset...')
-        train_accuracies, val_accuracies, knn_accuracy, result = run_models(
-        f'{dataset_name}_gan', augmented_loader, val_loader, num_classes
-        )
-        train_acc_history[f'{dataset_name}_gan'] = train_accuracies
-        val_acc_history[f'{dataset_name}_gan'] = val_accuracies
-        knn_acc_history[f'{dataset_name}_gan'] = knn_accuracy
-        results.append(result)
 
     #all plots
     plot_all_comparisons(train_acc_history, val_acc_history, knn_acc_history)

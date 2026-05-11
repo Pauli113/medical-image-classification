@@ -1,7 +1,7 @@
 import os
 
 import torch
-from torchvision import transforms
+from torchvision import transforms, datasets
 from torchvision.utils import save_image
 
 from src.utils.runner import load_dataset, run_gan
@@ -23,12 +23,20 @@ data_dirs = {
 def save_generated_images(generator, train_loader, data_dir):
         gan_dir = os.path.join(data_dir, 'gan')
         os.makedirs(gan_dir, exist_ok=True)
+
+        # Klassenordner aus originalem Datensatz holen
+        original_dataset = datasets.ImageFolder(data_dir)
+        classes = original_dataset.classes
+        for cls in classes:
+            os.makedirs(os.path.join(gan_dir, cls), exist_ok=True)
+
         img_count = 0
         with torch.no_grad():
-            for images, _ in train_loader:
-                fakes_images = generator(images)
-                for img in fakes_images:
-                    save_image(img, os.path.join(gan_dir,  f'fake_{img_count:05d}.png'))
+            for images, labels in train_loader:
+                fake_images = generator(images)
+                for img, label in zip(fake_images, labels):
+                    cls = classes[label.item()]
+                    save_image(img, os.path.join(gan_dir, cls, f'fake_{img_count:05d}.png'))
                     img_count += 1
         print(f'Saved {img_count} images to {gan_dir}')
         return gan_dir
