@@ -2,7 +2,6 @@ import os
 
 from src.utils.plot_comparisons import plot_all_comparisons
 from src.utils.runner import run_models, load_dataset, run_gan, augment_dataset
-from src.utils.plot import plot_results
 
 from torchvision import transforms
 import pandas as pd
