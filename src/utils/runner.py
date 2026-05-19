@@ -1,3 +1,5 @@
+import os
+
 import torch
 from torchvision import datasets
 
@@ -7,7 +9,15 @@ from src.models.unet.application.unet_trainer import UNetTrainer
 
 
 def load_dataset(data_dir, transform, batch_size=32):
-    dataset = datasets.ImageFolder(data_dir, transform=transform)
+    training_dir = os.path.join(data_dir, 'Training')
+    if os.path.exists(training_dir):
+        data_dir = training_dir
+
+    dataset = datasets.ImageFolder(
+        data_dir,
+        transform=transform,
+        is_valid_file=lambda x: 'gan' not in x.split(os.sep)
+    )
 
     train_size = int(0.8 * len(dataset))
     val_size = len(dataset) - train_size
@@ -17,7 +27,6 @@ def load_dataset(data_dir, transform, batch_size=32):
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     return train_loader, val_loader, len(dataset.classes)
-
 
 def run_models(dataset_name, train_loader, val_loader, num_classes, epochs=5):
     # Run U-Net
