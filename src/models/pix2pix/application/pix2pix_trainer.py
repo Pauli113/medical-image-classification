@@ -36,7 +36,7 @@ class Pix2PixTrainer:
                 loss_real = self.criterion(real_output, real_labels)
 
                 # fake images - labeled as 0
-                fake_output = self.discriminator(fake_images.detach())
+                fake_output = self.discriminator(real_images, fake_images.detach())
                 fake_labels = torch.zeros_like(fake_output)
                 loss_fake = self.criterion(fake_output, fake_labels)
 
@@ -67,4 +67,4 @@ class Pix2PixTrainer:
 
         gan_time = timer.stop()
         print(f'Pix2Pix Training Time: {gan_time}')
-        return gan_time
+        return self.generator, gan_time
