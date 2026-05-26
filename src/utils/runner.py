@@ -5,6 +5,7 @@ from torchvision import datasets
 
 from src.models.gan.application.gan_trainer import GANTrainer
 from src.models.knn.application.knn_trainer import KNNTrainer
+from src.models.pix2pix.application.pix2pix_trainer import Pix2PixTrainer
 from src.models.unet.application.unet_trainer import UNetTrainer
 
 
@@ -52,6 +53,10 @@ def run_gan(train_loader, epochs=5):
     gan_time = trainer.train(train_loader, epochs)
     return trainer.generator, gan_time
 
+def run_pix2pix(train_loader, epochs=5):
+    trainer = Pix2PixTrainer()
+    generator, pix2pix_time = trainer.train(train_loader, epochs)
+    return generator, pix2pix_time
 def augment_dataset(generator, train_loader):
     all_images = []
     all_labels = []
@@ -74,3 +79,6 @@ def augment_dataset(generator, train_loader):
     #create dataloader
     augmented_dataset = torch.utils.data.TensorDataset(all_images, all_labels)
     return torch.utils.data.DataLoader(augmented_dataset, batch_size=32, shuffle=True)
+
+
+
