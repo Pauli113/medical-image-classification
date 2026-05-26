@@ -26,11 +26,19 @@ def save_generated_images(generator, train_loader, data_dir):
     for cls in classes:
         os.makedirs(os.path.join(gan_dir, cls), exist_ok=True)
 
+    # Normalisierung rückgängig machen
+    mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
+    std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
+
     img_count = 0
     with torch.no_grad():
         for images, labels in train_loader:
             fake_images = generator(images)
+            # Tanh Output von -1/1 auf 0/1
             fake_images = (fake_images + 1) / 2
+            # Denormalisierung
+            fake_images = fake_images * std + mean
+            fake_images = torch.clamp(fake_images, 0, 1)
             for img, label in zip(fake_images, labels):
                 cls = classes[label.item()]
                 save_image(img, os.path.join(gan_dir, cls, f'fake_{img_count:05d}.png'))
@@ -44,6 +52,6 @@ if __name__ == "__main__":
     for dataset_name, data_dir in data_dirs.items():
         print(f'Training GAN on {dataset_name}...')
         train_loader, val_loader, num_classes = load_dataset(data_dir, transform)
-        generator, gan_time = run_gan(train_loader, epochs=50)
+        generator, gan_time = run_gan(train_loader, epochs=30)
         save_generated_images(generator, train_loader, data_dir)
 
