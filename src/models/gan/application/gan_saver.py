@@ -15,8 +15,8 @@ transform = transforms.Compose([
 # Directory paths for datasets
 data_dirs = {
     'xray_covid_19': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'data', 'xray_dataset_covid19')),
-    'xray': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'data', 'xray')),
-    'mri': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'data', 'mri'))
+    'xray': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'data', 'xray'))
+    #'mri': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'data', 'mri'))
 }
 
 

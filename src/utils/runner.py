@@ -1,9 +1,8 @@
 import os
-
 import torch
 from torchvision import datasets
+from torch.utils.data import ConcatDataset
 
-from src.models.gan.application.gan_trainer import GANTrainer
 from src.models.knn.application.knn_trainer import KNNTrainer
 from src.models.pix2pix.application.pix2pix_trainer import Pix2PixTrainer
 from src.models.unet.application.unet_trainer import UNetTrainer
@@ -11,15 +10,50 @@ from src.models.unet.application.unet_trainer import UNetTrainer
 
 def load_dataset(data_dir, transform, batch_size=32):
     training_dir = os.path.join(data_dir, 'Training')
-    if os.path.exists(training_dir):
-        data_dir = training_dir
+    testing_dir = os.path.join(data_dir, 'Testing')
+    train_dir = os.path.join(data_dir, 'train')
+    test_dir = os.path.join(data_dir, 'test')
 
-    dataset = datasets.ImageFolder(
-        data_dir,
-        transform=transform,
-        is_valid_file=lambda x: 'gan' not in x.split(os.sep)
+    # ignore generated image folders
+    is_valid = lambda x: all(
+        folder not in ['pix2pix']
+        for folder in x.split(os.sep)
     )
 
+    if os.path.exists(training_dir) and os.path.exists(testing_dir):
+        # MRI - combine Training and Testing
+        train_data = datasets.ImageFolder(training_dir, transform=transform, is_valid_file=is_valid)
+        test_data = datasets.ImageFolder(testing_dir, transform=transform, is_valid_file=is_valid)
+        dataset = ConcatDataset([train_data, test_data])
+        num_classes = len(train_data.classes)
+
+    elif os.path.exists(train_dir) and os.path.exists(test_dir):
+        # xray_covid_19 - combine train and test
+        train_data = datasets.ImageFolder(train_dir, transform=transform, is_valid_file=is_valid)
+        test_data = datasets.ImageFolder(test_dir, transform=transform, is_valid_file=is_valid)
+        dataset = ConcatDataset([train_data, test_data])
+        num_classes = len(train_data.classes)
+
+    else:
+        # xray - filter out generated image folders
+        dataset = datasets.ImageFolder(
+        data_dir,
+        transform=transform,
+        is_valid_file=is_valid,
+        allow_empty=True  # ← erlaubt leere Klassen
+        )
+        valid_classes = sorted([
+             c for c in dataset.classes
+            if c not in ['pix2pix']
+        ])
+        valid_idx = {dataset.class_to_idx[c] for c in valid_classes}
+        dataset.samples = [(p, l) for p, l in dataset.samples if l in valid_idx]
+        dataset.targets = [l for l in dataset.targets if l in valid_idx]
+        dataset.classes = valid_classes
+        dataset.class_to_idx = {c: i for i, c in enumerate(valid_classes)}
+        num_classes = len(valid_classes)
+
+    # 80/20 split
     train_size = int(0.8 * len(dataset))
     val_size = len(dataset) - train_size
     train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
@@ -27,7 +61,8 @@ def load_dataset(data_dir, transform, batch_size=32):
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
-    return train_loader, val_loader, len(dataset.classes)
+    return train_loader, val_loader, num_classes
+
 
 def run_models(dataset_name, train_loader, val_loader, num_classes, epochs=5):
     # Run U-Net
@@ -48,37 +83,8 @@ def run_models(dataset_name, train_loader, val_loader, num_classes, epochs=5):
 
     return train_accuracies, val_accuracies, knn_accuracy, result
 
-def run_gan(train_loader, epochs=5):
-    trainer = GANTrainer()
-    gan_time = trainer.train(train_loader, epochs)
-    return trainer.generator, gan_time
 
 def run_pix2pix(train_loader, epochs=5):
     trainer = Pix2PixTrainer()
     generator, pix2pix_time = trainer.train(train_loader, epochs)
     return generator, pix2pix_time
-def augment_dataset(generator, train_loader):
-    all_images = []
-    all_labels = []
-
-    with torch.no_grad():
-        for images, labels in train_loader:
-
-            #real images
-            all_images.append(images)
-            all_labels.append(labels)
-            #fake images
-            fake_images = generator(images)
-            all_images.append(fake_images)
-            all_labels.append(labels)
-
-    #combine images and labels
-    all_images = torch.cat(all_images, dim=0)
-    all_labels = torch.cat(all_labels, dim=0)
-
-    #create dataloader
-    augmented_dataset = torch.utils.data.TensorDataset(all_images, all_labels)
-    return torch.utils.data.DataLoader(augmented_dataset, batch_size=32, shuffle=True)
-
-
-
